@@ -1,0 +1,111 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+
+
+def packTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.0"
+    defaultConfig {
+        applicationId "com.zmsoft.serveddesk"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {// 自己的签名文件
+            storeFile file("../sellhelper.jks")
+            storePassword "961225"
+            keyAlias "sellhelper"
+            keyPassword "961225"
+        }
+    }
+
+    buildTypes {
+        local {
+            applicationIdSuffix ".local"
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            //运行环境
+            buildConfigField "String", "ENVIRONMENT", "\"LOCAL\""
+            versionNameSuffix "-local"
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+
+            manifestPlaceholders = [
+                    APP_NAME: "收银助手本地",
+            ]
+        }
+
+        debug {
+            applicationIdSuffix ".test"
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            //运行环境
+            buildConfigField "String", "ENVIRONMENT", "\"DEV\""
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+
+            manifestPlaceholders = [
+                    APP_NAME: "收银助手测试",
+            ]
+        }
+
+
+        release {
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            //运行环境
+            buildConfigField "String", "ENVIRONMENT", "\"PRO\""
+            //混淆
+            minifyEnabled true
+            //Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            manifestPlaceholders = [
+                    APP_NAME: "收银助手",
+            ]
+
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def outputFile = output.outputFile
+                    if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                        // 输出apk名称为app_v1.0_2015-xx-xx_xxxx.apk
+                        def fileName = "sellhelper_v${defaultConfig.versionName}_${packTime()}.apk"
+                        output.outputFile = new File(outputFile.parent, fileName)
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.zhy:okhttputils:2.6.2'
+    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.jakewharton:butterknife:8.6.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+    testCompile 'junit:junit:4.12'
+}
