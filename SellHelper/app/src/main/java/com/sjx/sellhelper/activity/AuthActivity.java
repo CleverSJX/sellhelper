@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,16 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sjx.sellhelper.R;
 import com.sjx.sellhelper.constant.UrlConstants;
 import com.sjx.sellhelper.entity.Vip;
+import com.sjx.sellhelper.util.JSONUtils;
+import com.sjx.sellhelper.util.LogUtils;
 import com.sjx.sellhelper.util.UIUtils;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,58 +72,49 @@ public class AuthActivity extends BaseActivity {
 
     private void showInfo(String mobile) {
         mProgressDialog.show();
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("mobile", mobile);
-            OkHttpUtils.postString()
-                    .url(UrlConstants.getApi(API_AUTH_VIP))
-                    .content(jsonObject.toString())
-                    .mediaType(UrlConstants.JSON_TYPE)
-                    .build()
-                    .execute(new StringCallback() {
-                        @Override
-                        public void onError(Call call, Exception e, int id) {
-                            mProgressDialog.dismiss();
-                            Log.i(TAG, "onError: " + e.getMessage());
-                            Toast.makeText(AuthActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("mobile", mobile);
+        OkHttpUtils.postString()
+                .url(UrlConstants.getApi(API_AUTH_VIP))
+                .content(jsonObject.toString())
+                .mediaType(UrlConstants.JSON_TYPE)
+                .build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        mProgressDialog.dismiss();
+                        LogUtils.e(TAG, "网络异常", e);
+                        Toast.makeText(AuthActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
 
-                        @Override
-                        public void onResponse(String response, int id) {
-                            mProgressDialog.dismiss();
-                            try {
-                                JSONObject result = new JSONObject(response);
-                                if (result.getInt("code") == 0) {
-                                    //正常数据返回
-                                    JSONObject data = result.getJSONObject("data");
-                                    if (data.getBoolean("isMember")) {
-                                        //是会员
-                                        //显示详情
-                                        llInfo.setVisibility(View.VISIBLE);
-                                        llWarn.setVisibility(View.GONE);
-                                        Vip vip = new Gson().fromJson(data.toString(), Vip.class);
-                                        tvMobile.setText(vip.getMobile());
-                                        tvName.setText(vip.getName());
-                                        tvPosTime.setText(vip.getPosTime());
-                                        tvCreateTime.setText(vip.getCreateTime());
-                                    } else {
-                                        llWarn.setVisibility(View.VISIBLE);
-                                        llInfo.setVisibility(View.GONE);
-                                    }
-                                } else {
-                                    Toast.makeText(AuthActivity.this, "系统异常", Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Toast.makeText(AuthActivity.this, "参数异常", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onResponse(String response, int id) {
+                        mProgressDialog.dismiss();
+                        JsonObject result = JSONUtils.parse(response);
+                        if (JSONUtils.getElementInt(result, "code") == 0) {
+                            //正常数据返回
+                            JsonObject data = JSONUtils.getElementJsonObject(result, "data");
+                            if (JSONUtils.getElementBoolean(data, "isMember")) {
+                                //是会员
+                                //显示详情
+                                llInfo.setVisibility(View.VISIBLE);
+                                llWarn.setVisibility(View.GONE);
+                                Vip vip = JSONUtils.fromJsonObject(data, Vip.class);
+                                tvMobile.setText(vip.getMobile());
+                                tvName.setText(vip.getName());
+                                tvPosTime.setText(vip.getPosTime());
+                                tvCreateTime.setText(vip.getCreateTime());
+                            } else {
+                                llWarn.setVisibility(View.VISIBLE);
+                                llInfo.setVisibility(View.GONE);
                             }
+                        } else {
+                            LogUtils.e(TAG, "系统异常" + result.toString());
+                            Toast.makeText(AuthActivity.this, "系统异常", Toast.LENGTH_SHORT).show();
                         }
-                    });
-        } catch (JSONException e) {
-            e.printStackTrace();
-            mProgressDialog.dismiss();
-        }
+                    }
+                });
     }
 
 
@@ -156,7 +145,6 @@ public class AuthActivity extends BaseActivity {
         } catch (PendingIntent.CanceledException e) {
             e.printStackTrace();
         }
-        //context.startActivity(intent);
     }
 
     @OnClick({R.id.btn_auth, R.id.btn_confirm, R.id.btn_warn_confirm})

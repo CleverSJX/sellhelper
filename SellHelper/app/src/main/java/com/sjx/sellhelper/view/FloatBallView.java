@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Vibrator;
 import android.util.TypedValue;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -16,6 +15,7 @@ import com.sjx.sellhelper.R;
 import com.sjx.sellhelper.activity.AuthActivity;
 import com.sjx.sellhelper.util.AccessibilityUtil;
 import com.sjx.sellhelper.util.ConvertUtils;
+import com.sjx.sellhelper.util.LogUtils;
 
 import java.lang.reflect.Field;
 
@@ -24,6 +24,8 @@ import java.lang.reflect.Field;
  */
 
 public class FloatBallView extends LinearLayout {
+    private static final String TAG = "FloatBallView";
+
     private ImageView mImgBall;
     private ImageView mImgBigBall;
     private ImageView mImgBg;
@@ -81,9 +83,9 @@ public class FloatBallView extends LinearLayout {
 
     private void initView() {
         inflate(getContext(), R.layout.layout_ball, this);
-        mImgBall = (ImageView) findViewById(R.id.img_ball);
-        mImgBigBall = (ImageView) findViewById(R.id.img_big_ball);
-        mImgBg = (ImageView) findViewById(R.id.img_bg);
+        mImgBall = findViewById(R.id.img_ball);
+        mImgBigBall = findViewById(R.id.img_big_ball);
+        mImgBg = findViewById(R.id.img_bg);
 
         mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         mCurrentMode = MODE_NONE;
@@ -92,69 +94,64 @@ public class FloatBallView extends LinearLayout {
         mOffsetToParent = dip2px(25);
         mOffsetToParentY = mStatusBarHeight + mOffsetToParent;
 
-        mImgBigBall.post(new Runnable() {
-            @Override
-            public void run() {
-                mBigBallX = mImgBigBall.getX();
-                mBigBallY = mImgBigBall.getY();
-            }
+        mImgBigBall.post(() -> {
+            mBigBallX = mImgBigBall.getX();
+            mBigBallY = mImgBigBall.getY();
         });
 
-        mImgBg.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, final MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        mIsTouching = true;
-                        mImgBall.setVisibility(INVISIBLE);
-                        mImgBigBall.setVisibility(VISIBLE);
-                        mLastDownTime = System.currentTimeMillis();
-                        mLastDownX = event.getX();
-                        mLastDownY = event.getY();
-                        postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isLongTouch()) {
-                                    mIsLongTouch = true;
-                                    mVibrator.vibrate(mPattern, -1);
-                                }
-                            }
-                        }, LONG_CLICK_LIMIT);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        if (!mIsLongTouch && isTouchSlop(event)) {
-                            return true;
+        mImgBg.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mIsTouching = true;
+                    mImgBall.setVisibility(INVISIBLE);
+                    mImgBigBall.setVisibility(VISIBLE);
+                    mLastDownTime = System.currentTimeMillis();
+                    mLastDownX = event.getX();
+                    mLastDownY = event.getY();
+                    postDelayed(() -> {
+                        if (isLongTouch()) {
+                            mIsLongTouch = true;
+                            mVibrator.vibrate(mPattern, -1);
                         }
-                        if (mIsLongTouch && (mCurrentMode == MODE_NONE || mCurrentMode == MODE_MOVE)) {
-                            mLayoutParams.x = (int) (event.getRawX() - mOffsetToParent);
-                            mLayoutParams.y = (int) (event.getRawY() - mOffsetToParentY);
-                            mWindowManager.updateViewLayout(FloatBallView.this, mLayoutParams);
-                            mBigBallX = mImgBigBall.getX();
-                            mBigBallY = mImgBigBall.getY();
-                            mCurrentMode = MODE_MOVE;
-                        } else {
-                            doGesture(event);
-                        }
-                        break;
-                    case MotionEvent.ACTION_CANCEL:
-                    case MotionEvent.ACTION_UP:
-                        mIsTouching = false;
-                        if (mIsLongTouch) {
-                            mIsLongTouch = false;
-                        } else if (isClick(event)) {
-                            //AccessibilityUtil.doBack(mService);
-                            //打开SearchActivity
+                    }, LONG_CLICK_LIMIT);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (!mIsLongTouch && isTouchSlop(event)) {
+                        return true;
+                    }
+                    if (mIsLongTouch && (mCurrentMode == MODE_NONE || mCurrentMode == MODE_MOVE)) {
+                        mLayoutParams.x = (int) (event.getRawX() - mOffsetToParent);
+                        mLayoutParams.y = (int) (event.getRawY() - mOffsetToParentY);
+                        mWindowManager.updateViewLayout(FloatBallView.this, mLayoutParams);
+                        mBigBallX = mImgBigBall.getX();
+                        mBigBallY = mImgBigBall.getY();
+                        mCurrentMode = MODE_MOVE;
+                    } else {
+                        doGesture(event);
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    mIsTouching = false;
+                    if (mIsLongTouch) {
+                        mIsLongTouch = false;
+                    } else if (isClick(event)) {
+                        //AccessibilityUtil.doBack(mService);
+                        //打开SearchActivity
+                        try {
                             AuthActivity.start(FloatBallView.this.getContext());
-                        } else {
-                            doUp();
+                        } catch (Exception e) {
+                            LogUtils.e(TAG, e);
                         }
-                        mImgBall.setVisibility(VISIBLE);
-                        mImgBigBall.setVisibility(INVISIBLE);
-                        mCurrentMode = MODE_NONE;
-                        break;
-                }
-                return true;
+                    } else {
+                        doUp();
+                    }
+                    mImgBall.setVisibility(VISIBLE);
+                    mImgBigBall.setVisibility(INVISIBLE);
+                    mCurrentMode = MODE_NONE;
+                    break;
             }
+            return true;
         });
     }
 
@@ -226,13 +223,10 @@ public class FloatBallView extends LinearLayout {
                 mImgBigBall.setX(mBigBallX);
                 mImgBigBall.setY(mBigBallY + OFFSET);
                 //如果长时间保持下拉状态，将会触发移除悬浮球功能
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mCurrentMode == MODE_DOWN && mIsTouching) {
-                            toRemove();
-                            mCurrentMode = MODE_GONE;
-                        }
+                postDelayed(() -> {
+                    if (mCurrentMode == MODE_DOWN && mIsTouching) {
+                        toRemove();
+                        mCurrentMode = MODE_GONE;
                     }
                 }, REMOVE_LIMIT);
             } else {

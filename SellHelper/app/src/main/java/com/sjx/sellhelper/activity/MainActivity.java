@@ -60,19 +60,11 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.btn_start:
                 checkAccessibility();
-                Intent intent = new Intent(MainActivity.this, FloatBallService.class);
-                Bundle data = new Bundle();
-                data.putInt("type", FloatBallService.TYPE_ADD);
-                intent.putExtras(data);
-                startService(intent);
+                FloatBallService.addBall(this);
                 finish();
                 break;
             case R.id.btn_quit:
-                Intent intent2 = new Intent(MainActivity.this, FloatBallService.class);
-                Bundle data2 = new Bundle();
-                data2.putInt("type", FloatBallService.TYPE_DEL);
-                intent2.putExtras(data2);
-                startService(intent2);
+                FloatBallService.deleteBall(this);
                 finish();
                 break;
         }
