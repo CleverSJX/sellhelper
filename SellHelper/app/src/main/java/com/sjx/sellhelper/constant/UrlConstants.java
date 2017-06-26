@@ -4,11 +4,12 @@ import okhttp3.MediaType;
 
 /**
  * Created by SJX on 2017/6/20.
+ * url 接口常量
  */
 
 public class UrlConstants {
 
-    public static String BaseApi;
+    static String BaseApi;
 
     public static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
 

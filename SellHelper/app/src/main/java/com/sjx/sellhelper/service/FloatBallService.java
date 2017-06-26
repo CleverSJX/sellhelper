@@ -9,7 +9,8 @@ import android.view.accessibility.AccessibilityEvent;
 import com.sjx.sellhelper.view.FloatWindowManager;
 
 /**
- * Created by wangxiandeng on 2016/11/25.
+ * Created by SJX on 2017/6/20.
+ * 悬浮球服务
  */
 
 public class FloatBallService extends AccessibilityService {

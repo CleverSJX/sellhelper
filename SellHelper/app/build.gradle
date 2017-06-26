@@ -36,25 +36,9 @@ android {
     }
 
     buildTypes {
-        local {
-            applicationIdSuffix ".local"
-            // 显示Log
-            buildConfigField "boolean", "LOG_DEBUG", "true"
-            //运行环境
-            buildConfigField "String", "ENVIRONMENT", "\"LOCAL\""
-            versionNameSuffix "-local"
-            minifyEnabled false
-            zipAlignEnabled false
-            shrinkResources false
-            signingConfig signingConfigs.release
-
-            manifestPlaceholders = [
-                    APP_NAME: "收银助手本地",
-            ]
-        }
 
         debug {
-            applicationIdSuffix ".test"
+            applicationIdSuffix ".debug"
             // 显示Log
             buildConfigField "boolean", "LOG_DEBUG", "true"
             //运行环境
@@ -62,11 +46,11 @@ android {
             versionNameSuffix "-debug"
             minifyEnabled false
             zipAlignEnabled false
-            shrinkResources false
+//            shrinkResources false
             signingConfig signingConfigs.release
 
             manifestPlaceholders = [
-                    APP_NAME: "收银助手测试",
+                    APP_NAME: "收银助手测试"
             ]
         }
 
@@ -81,12 +65,12 @@ android {
             //Zipalign优化
             zipAlignEnabled true
             // 移除无用的resource文件
-            shrinkResources true
+//            shrinkResources true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             manifestPlaceholders = [
-                    APP_NAME: "收银助手",
+                    APP_NAME: "收银助手"
             ]
 
             applicationVariants.all { variant ->

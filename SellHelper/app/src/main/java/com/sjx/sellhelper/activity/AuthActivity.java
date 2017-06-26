@@ -30,6 +30,10 @@ import okhttp3.Call;
 
 import static com.sjx.sellhelper.constant.UrlConstants.API_AUTH_VIP;
 
+/**
+ * Created by SJX on 2017/6/20.
+ * 验证界面
+ */
 public class AuthActivity extends BaseActivity {
     private static final String TAG = "AuthActivity";
 

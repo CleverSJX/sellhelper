@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient;
 
 /**
  * Created by SJX on 2017/6/20.
+ * APP入口
  */
 
 public class SellHelperApplication extends Application {

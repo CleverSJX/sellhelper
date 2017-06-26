@@ -2,6 +2,7 @@ package com.sjx.sellhelper.constant;
 
 /**
  * Created by SJX on 2017/6/20.
+ * 运行常量类
  */
 
 public class RunConstants {

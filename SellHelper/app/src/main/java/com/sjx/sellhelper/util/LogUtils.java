@@ -6,6 +6,7 @@ import com.sjx.sellhelper.BuildConfig;
 
 /**
  * Created by SJX on 2017/6/23.
+ * 日志工具类
  */
 
 public class LogUtils {

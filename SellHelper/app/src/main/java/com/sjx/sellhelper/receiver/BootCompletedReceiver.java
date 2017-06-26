@@ -8,6 +8,7 @@ import com.sjx.sellhelper.service.FloatBallService;
 
 /**
  * Created by SJX on 2017/6/14.
+ * 开机重启服务
  */
 
 public class BootCompletedReceiver extends BroadcastReceiver {

@@ -5,7 +5,8 @@ import android.content.Context;
 import android.provider.Settings;
 
 /**
- * Created by wangxiandeng on 2016/11/25.
+ * Created by SJX on 2017/6/20.
+ * 辅助功能工具类
  */
 
 public class AccessibilityUtil {

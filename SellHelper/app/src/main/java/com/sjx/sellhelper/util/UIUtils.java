@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager;
 
 /**
  * Created by SJX on 2017/6/20.
+ * UI 工具类
  */
 
 public class UIUtils {

@@ -5,10 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.sjx.sellhelper.util.UIUtils;
 
-/**
- * Created by SJX on 2017/6/20.
- */
-
 public class BaseActivity extends AppCompatActivity {
 
     @Override

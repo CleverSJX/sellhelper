@@ -4,6 +4,7 @@ import android.content.Context;
 
 /**
  * Created by SJX on 2017/6/20.
+ * 转换工具类
  */
 
 public class ConvertUtils {

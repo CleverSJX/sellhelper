@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by SJX on 2017/6/21.
+ * 会员实体
  */
 
 public class Vip {
